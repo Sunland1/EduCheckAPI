@@ -8,6 +8,7 @@ var jwt = require('jsonwebtoken')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var dataRouter = require('./routes/EduCheckAPI/data')
+var ficheRouter = require('./routes/EduCheckAPI/fiche')
 
 var app = express();
 
@@ -41,6 +42,7 @@ app.use((req, res, next) => {
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/educheck-api/data' , dataRouter )
+app.use('/educheck-api/fiche', ficheRouter)
 
 
 
