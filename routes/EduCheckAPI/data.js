@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs')
 
-const model = require('../../Modele/Model')
+const model = require('../../model/Model')
 const jwt = require('jsonwebtoken')
 const TOKEN = require('../../bin/token.json').TOKEN_SECRET
 

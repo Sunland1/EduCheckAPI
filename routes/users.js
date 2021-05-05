@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var model = require('../Modele/Model')
+var model = require('../model/Model')
 var bcrypt = require('bcrypt')
 
 router.post('/register', (req, res, next) => {
