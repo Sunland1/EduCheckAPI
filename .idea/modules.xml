@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/EduCheckAPI.iml" filepath="$PROJECT_DIR$/.idea/EduCheckAPI.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../EduChek/.idea/EduChek.iml" filepath="$PROJECT_DIR$/../EduChek/.idea/EduChek.iml" />
     </modules>
   </component>
 </project>
