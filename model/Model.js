@@ -294,8 +294,8 @@ class Model {
 
     static insertAllocateFiche(data, cb) {
         connection.query('INSERT INTO table_fiche_affecter (id_class,ref_code,id_teacher,heure_affecter,heure_double_affecter) ' +
-                                'VALUES (?,?,?,?,?)',
-            [data.id_class, data.ref_code,data.id_teacher,data.heure_affecter, data.heure_double_affecter], (err) => {
+            'VALUES (?,?,?,?,?)',
+            [data.id_class, data.ref_code, data.id_teacher, data.heure_affecter, data.heure_double_affecter], (err) => {
                 if (err) throw err
                 cb()
             }
@@ -305,20 +305,90 @@ class Model {
 
     static updateAllocateFiche(id_class, data, cb) {
         connection.query('UPDATE table_fiche_affecter SET id_class=?,ref_code=?,id_teacher=?,heure_affecter=?,heure_double_affecter=?',
-            [id_class, data.ref_code,data.id_teacher,data.heure_affecter, data.heure_double_affecter], (err) => {
+            [id_class, data.ref_code, data.id_teacher, data.heure_affecter, data.heure_double_affecter], (err) => {
                 if (err) throw err
                 cb()
             }
         )
     }
 
-    static deleteAllocateFiche(id_class,cb){
-        connection.query('DELETE FROM table_fiche_affecter WHERE id_class=?',[id_class],(err) => {
-            if(err) throw err
+    static deleteAllocateFiche(id_class, cb) {
+        connection.query('DELETE FROM table_fiche_affecter WHERE id_class=?', [id_class], (err) => {
+            if (err) throw err
             cb()
         })
     }
 
+
+    //<------------------- Recap Methode ------------------------------------------------>
+
+    static getRecapRef_code(cb) {
+        connection.query('SELECT s.ref_code,s.name,SUM(heure_affecter+heure_double_affecter) as totals FROM table_fiche_affecter\n' +
+            'JOIN subject s on s.ref_code = table_fiche_affecter.ref_code GROUP BY s.ref_code',
+            (err, rows) => {
+                if (err) throw err
+                cb(rows)
+            })
+    }
+
+    static getRecapRef_codeFilter(filter, cb) {
+        connection.query('SELECT s.ref_code,s.name,SUM(heure_affecter+heure_double_affecter) as totals FROM table_fiche_affecter\n' +
+            'JOIN subject s on s.ref_code = table_fiche_affecter.ref_code\n' +
+            'WHERE s.sector = ? GROUP BY s.ref_code',
+            [filter], (err, rows) => {
+                if (err) throw err
+                cb(rows)
+            }
+        )
+    }
+
+    static getRecapTeacher(cb){
+        connection.query('SELECT t.id_teacher,t.name as teacher_name,id_class,c.name as class_name,heure_affecter+heure_double_affecter as tot_class FROM table_fiche_affecter\n' +
+                            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
+                            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher',
+            (err,rows) => {
+                if(err) throw err
+                cb(rows)
+            }
+        )
+    }
+
+
+    static getRecapTeacherFilter(filter,cb){
+        connection.query('SELECT t.id_teacher,t.name as teacher_name,c.id_class,c.name as class_name,heure_affecter+heure_double_affecter as tot_class FROM table_fiche_affecter\n' +
+            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
+            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n' +
+            '   WHERE sector = ?' ,[filter],
+            (err,rows) => {
+                if(err) throw err
+                cb(rows)
+            }
+        )
+    }
+
+    static getMaxTeacher(cb){
+        connection.query('SELECT t.id_teacher,t.name,SUM(heure_affecter+heure_double_affecter) as MaxTOT FROM table_fiche_affecter\n' +
+            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
+            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher GROUP BY t.id_teacher',
+            (err,rows) => {
+                if(err) throw err
+                cb(rows)
+            }
+        )
+    }
+
+
+    static getMaxTeacherFilter(filter,cb){
+        connection.query('SELECT t.id_teacher,t.name,SUM(heure_affecter+heure_double_affecter) as MaxTOT FROM table_fiche_affecter\n' +
+            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
+            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher \n' +
+            'WHERE sector = ? GROUP BY t.id_teacher',
+            [filter],(err,rows) => {
+                if(err) throw err
+                cb(rows)
+            }
+        )
+    }
 
 
 }
