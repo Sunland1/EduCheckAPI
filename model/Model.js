@@ -137,10 +137,11 @@ class Model {
     static insertClass(data, sector, cb) {
         connection.query('INSERT INTO class (sector,name) VALUES (?,?)', [sector, data[0]], (err, row) => {
             if (err) throw err
+            let id_class = row.insertId
             connection.query('INSERT INTO teacher_class_p (id_teacher,id_class) VALUES (?,?)',
                 [data[1], row.insertId], (err) => {
                     if (err) throw err
-                    cb()
+                    cb(id_class)
                 }
             )
         })

@@ -118,8 +118,10 @@ router.post("/class", (req, res) => {
     let data = req.body.data
     let sector = req.body.sector
 
-    model.insertClass(data, sector, () => {
-        res.sendStatus(201)
+    model.insertClass(data, sector, (id_class) => {
+        res.status(201).json({
+            id_class: id_class
+        })
     })
 
 })
