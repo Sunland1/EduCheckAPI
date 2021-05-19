@@ -105,7 +105,7 @@ class Model {
     }
 
     static getAllClassPP(cb) {
-        connection.query('SELECT class.id_class,class.name as division,teacher.civility,teacher.name,class.sector FROM class\n' +
+        connection.query('SELECT class.id_class,class.name as division,teacher.civility,teacher.name,teacher.id_teacher FROM class\n' +
             'JOIN teacher_class_p tcp on class.id_class = tcp.id_class\n' +
             'JOIN teacher on teacher.id_teacher = tcp.id_teacher',
             (err, rows) => {
@@ -116,7 +116,7 @@ class Model {
     }
 
     static getAllClassFilterPP(filter, cb) {
-        connection.query('SELECT class.id_class,class.name as division,teacher.civility,teacher.name,class.sector FROM class\n' +
+        connection.query('SELECT class.id_class,class.name as division,teacher.civility,teacher.name,teacher.id_teacher FROM class\n' +
             'JOIN teacher_class_p tcp on class.id_class = tcp.id_class\n' +
             'JOIN teacher on teacher.id_teacher = tcp.id_teacher WHERE class.sector=?', [filter],
             (err, rows) => {
@@ -175,7 +175,7 @@ class Model {
     }
 
     static getAllSubjectFilter(filter, cb) {
-        connection.query("SELECT * FROM subject WHERE sector=?", [filter], (err, rows) => {
+        connection.query("SELECT ref_code,name FROM subject WHERE sector=?", [filter], (err, rows) => {
             if (err) throw err
             cb(rows)
         })

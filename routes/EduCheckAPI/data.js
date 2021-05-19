@@ -56,9 +56,10 @@ router.post('/teacher', (req, res) => {
 })
 
 router.patch("/teacher/:id", (req, res) => {
+
     let data = req.body.data
     let id = req.params.id
-
+    console.log(data)
     model.updateTeacher(data, id, () => {
         res.sendStatus(200)
     })
