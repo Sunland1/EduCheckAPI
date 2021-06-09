@@ -344,7 +344,7 @@ class Model {
     }
 
     static getRecapTeacher(cb){
-        connection.query('SELECT t.id_teacher,t.name as teacher_name,id_class,c.name as class_name,heure_affecter+heure_double_affecter as tot_class FROM table_fiche_affecter\n' +
+        connection.query('SELECT t.id_teacher,t.name as teacher_name,c.id_class,c.sector,c.name as class_name,heure_affecter+heure_double_affecter as tot_class FROM table_fiche_affecter\n' +
                             'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
                             'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher',
             (err,rows) => {
@@ -368,7 +368,7 @@ class Model {
     }
 
     static getMaxTeacher(cb){
-        connection.query('SELECT t.id_teacher,t.name,SUM(heure_affecter+heure_double_affecter) as MaxTOT FROM table_fiche_affecter\n' +
+        connection.query('SELECT t.graduation,t.id_teacher,t.civility,t.name,SUM(heure_affecter+heure_double_affecter) as MaxTOT FROM table_fiche_affecter\n' +
             'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
             'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher GROUP BY t.id_teacher',
             (err,rows) => {
@@ -379,16 +379,29 @@ class Model {
     }
 
 
-    static getMaxTeacherFilter(filter,cb){
-        connection.query('SELECT t.id_teacher,t.name,SUM(heure_affecter+heure_double_affecter) as MaxTOT FROM table_fiche_affecter\n' +
-            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
-            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher \n' +
-            'WHERE sector = ? GROUP BY t.id_teacher',
-            [filter],(err,rows) => {
-                if(err) throw err
-                cb(rows)
-            }
-        )
+    static getMaxTeacherFilter(filter,subjectFilter,cb){
+        if(subjectFilter === undefined){
+            connection.query('SELECT t.graduation,t.id_teacher,t.civility,t.name,SUM(heure_affecter+heure_double_affecter) as MaxTOT FROM table_fiche_affecter\n' +
+                'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
+                'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher \n' +
+                'WHERE sector = ? GROUP BY t.id_teacher',
+                [filter],(err,rows) => {
+                    if(err) throw err
+                    cb(rows)
+                }
+            )
+        }else{
+            connection.query('SELECT t.graduation,t.id_teacher,t.civility,t.name,SUM(heure_affecter+heure_double_affecter) as MaxTOT FROM table_fiche_affecter\n' +
+                'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
+                'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher \n' +
+                'WHERE sector = ? AND ref_code = ? GROUP BY t.id_teacher',
+                [filter,subjectFilter],(err,rows) => {
+                    if(err) throw err
+                    cb(rows)
+                }
+            )
+        }
+
     }
 
 

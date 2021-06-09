@@ -51,8 +51,9 @@ router.get('/teacher' , (req, res) => {
 
 router.get('/teacherMax',(req, res) => {
     let filter = req.query.filter
+    let subjectFilter = req.query.subjectFilter
     if(filter !== undefined){
-        model.getMaxTeacherFilter(filter,(data) => {
+        model.getMaxTeacherFilter(filter,subjectFilter,(data) => {
             res.status(200).json(data)
         })
     }else{
