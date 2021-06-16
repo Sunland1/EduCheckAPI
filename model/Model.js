@@ -354,6 +354,17 @@ class Model {
         )
     }
 
+    static getRecapTeacherID(id,cb){
+        connection.query('SELECT t.id_teacher,t.name as teacher_name,c.id_class,c.sector,c.name as class_name,heure_affecter+heure_double_affecter as tot_class FROM table_fiche_affecter\n' +
+            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
+            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n'+
+            'WHERE t.id_teacher = ?',[id],
+            (err,rows) => {
+                if(err) throw err
+                cb(rows)
+            }
+        )
+    }
 
     static getRecapTeacherFilter(filter,cb){
         connection.query('SELECT t.id_teacher,t.name as teacher_name,c.id_class,c.name as class_name,heure_affecter+heure_double_affecter as tot_class FROM table_fiche_affecter\n' +

@@ -49,6 +49,14 @@ router.get('/teacher' , (req, res) => {
 })
 
 
+router.get('/teacher/:id' , (req,res) => {
+    let id_teacher = req.params.id
+    model.getRecapTeacherID(id_teacher,(data) => {
+        res.status(200).json(data)
+    })
+})
+
+
 router.get('/teacherMax',(req, res) => {
     let filter = req.query.filter
     let subjectFilter = req.query.subjectFilter
