@@ -244,7 +244,8 @@ class Model {
     }
 
     static getUsualFiche(id, cb) {
-        connection.query('SELECT * FROM table_fiche WHERE id_class=?', [id], (err, row) => {
+        connection.query('SELECT id_class , s.ref_code , name , heure , heure_double FROM table_fiche\n' +
+            'JOIN subject s on s.ref_code = table_fiche.ref_code WHERE id_class=?', [id], (err, row) => {
             if (err) throw err
             cb(row)
         })
@@ -305,8 +306,8 @@ class Model {
 
 
     static updateAllocateFiche(id_class, data, cb) {
-        connection.query('UPDATE table_fiche_affecter SET id_class=?,ref_code=?,id_teacher=?,heure_affecter=?,heure_double_affecter=?',
-            [id_class, data.ref_code, data.id_teacher, data.heure_affecter, data.heure_double_affecter], (err) => {
+        connection.query('UPDATE table_fiche_affecter SET ref_code=?,id_teacher=?,heure_affecter=?,heure_double_affecter=? WHERE id_class=?',
+            [data.ref_code, data.id_teacher, data.heure_affecter, data.heure_double_affecter,id_class], (err) => {
                 if (err) throw err
                 cb()
             }
