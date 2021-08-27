@@ -72,5 +72,27 @@ router.get('/teacherMax',(req, res) => {
 })
 
 
+router.get('/class' , (req,res) => {
+    let sector = req.query.sector
+    if(sector !== undefined) {
+        model.getTotHoureClassALL((data) => {
+            res.status(200).json(data)
+        } , sector )
+    }else{
+        model.getTotHoureClassALL((data) => {
+            res.status(200).json(data)
+        })
+    }
+})
+
+
+
+router.get('/class/:id' , (req,res) => {
+    let id_class = req.params.id
+    model.getTotHoureClass(id_class , (data) => {
+        res.status(200).json(data)
+    })
+})
+
 
 module.exports = router;

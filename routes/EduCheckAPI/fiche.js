@@ -26,6 +26,8 @@ router.use(function authenticateToken(req, res, next) {
 
 router.post('/usual', (req, res) => {
     let data = req.body
+
+    console.log(data)
     model.insertUsualFiche(data, () => {
         res.sendStatus(201)
     })
@@ -100,20 +102,25 @@ router.post('/allocate', (req, res) => {
 })
 
 
-router.patch('/allocate/:id',(req, res) => {
-    let id_class = req.params.id
+router.patch('/allocate',(req, res) => {
     let data = req.body
-    model.updateAllocateFiche(id_class,data,() => {
+    console.log(data)
+    model.updateAllocateFiche( data,() => {
         res.sendStatus(200)
     })
 })
 
-router.delete('/allocate/:id' , (req, res) => {
-    let id_class = req.params.id
-    model.deleteAllocateFiche(id_class,() => {
+router.delete('/allocate' , (req, res) => {
+    let ids = req.body
+    console.log(ids)
+    model.deleteAllocateFiche(ids,() => {
         res.sendStatus(204)
     })
 })
+
+
+
+
 
 
 module.exports = router;

@@ -173,6 +173,7 @@ router.post("/subject", (req, res) => {
     let data = req.body.data
     let sector = req.body.sector
 
+
     model.insertSubject(data, sector, () => {
         res.sendStatus(201)
     })
@@ -180,20 +181,53 @@ router.post("/subject", (req, res) => {
 
 router.patch('/subject/:id', (req, res) => {
     let data = req.body.data
-    let ref_code = req.params.id
+    let id_subject = req.params.id
 
-    model.updateSubject(data, ref_code, () => {
+    model.updateSubject(data, id_subject, () => {
         res.sendStatus(200)
     })
 })
 
 
 router.delete('/subject/:id', (req, res) => {
-    let ref_code = req.params.id
-    model.deleteSubject(ref_code, () => {
+    let id_subject = req.params.id
+    model.deleteSubject(id_subject, () => {
         res.sendStatus(204)
     })
 })
+
+
+//<----------------------- Ref_code -------------------------------->
+router.get("/ref_code/:ref_code" , (req,res) => {
+    let ref_code = req.params.ref_code
+    model.getRefCodeRecap(ref_code, (data) => {
+        res.status(200).json(data)
+    })
+})
+
+
+
+router.patch('/DHG/:sector/:DHG' , (req,res) => {
+    let sector = req.params.sector
+    let DHG = req.params.DHG
+
+    model.updateDHG(sector,DHG,(boolean) => {
+        if(boolean) res.sendStatus(200)
+        else res.sendStatus(400)
+    })
+})
+
+
+router.get('/DHG/:sector' , (req, res) => {
+    let sector = req.params.sector
+    model.getDHG(sector, (data) => {
+        res.status(200).json(data)
+    })
+})
+
+
+
+
 
 
 module.exports = router;

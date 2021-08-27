@@ -176,14 +176,14 @@ class Model {
     }
 
     static getAllSubjectFilter(filter, cb) {
-        connection.query("SELECT ref_code,name FROM subject WHERE sector=?", [filter], (err, rows) => {
+        connection.query("SELECT id_subject,ref_code,name FROM subject WHERE sector=?", [filter], (err, rows) => {
             if (err) throw err
             cb(rows)
         })
     }
 
     static getSubject(ref_code, cb) {
-        connection.query("SELECT * FROM subject WHERE ref_code=?;", [ref_code], (err, row) => {
+        connection.query("SELECT * FROM subject WHERE id_subject=?;", [ref_code], (err, row) => {
             if (err) throw err
             cb(row[0])
         })
@@ -196,9 +196,9 @@ class Model {
         })
     }
 
-    static updateSubject(data, ref_code, cb) {
-        connection.query("UPDATE subject SET ref_code=?,sector=?,name=? WHERE ref_code=?",
-            [data.ref_code, data.sector, data.name, ref_code], (err) => {
+    static updateSubject(data, id_subject, cb) {
+        connection.query("UPDATE subject SET ref_code=?,sector=?,name=? WHERE id_subject=?",
+            [data.ref_code, data.sector, data.name, id_subject], (err) => {
                 if (err) throw err
                 cb()
             }
@@ -206,8 +206,8 @@ class Model {
     }
 
 
-    static deleteSubject(ref_code, cb) {
-        connection.query("DELETE FROM subject WHERE ref_code=?", [ref_code], (err) => {
+    static deleteSubject(id_subject, cb) {
+        connection.query("DELETE FROM subject WHERE id_subject=?", [id_subject], (err) => {
             if (err) throw err
             cb()
         })
@@ -217,8 +217,8 @@ class Model {
     //<------------------------------ Methode Fiche ------------------------------------->
 
     static insertUsualFiche(data, cb) {
-        connection.query('INSERT INTO table_fiche (id_class,ref_code,heure,heure_double) VALUES (?,?,?,?)',
-            [data.id_class, data.ref_code, data.heure, data.heure_double], (err) => {
+        connection.query('INSERT INTO table_fiche (id_subject,id_class,nb_heure) VALUES (?,?,?)',
+            [data.id_subject, data.id_class, data.heure], (err) => {
                 if (err) throw err
                 cb()
             }
@@ -244,8 +244,8 @@ class Model {
     }
 
     static getUsualFiche(id, cb) {
-        connection.query('SELECT id_class , s.ref_code , name , heure , heure_double FROM table_fiche\n' +
-            'JOIN subject s on s.ref_code = table_fiche.ref_code WHERE id_class=?', [id], (err, row) => {
+        connection.query('SELECT id_class , s.id_subject,s.name,s.ref_code , name , nb_heure FROM table_fiche\n' +
+            'JOIN subject s on s.id_subject = table_fiche.id_subject WHERE id_class=?', [id], (err, row) => {
             if (err) throw err
             cb(row)
         })
@@ -288,16 +288,19 @@ class Model {
     }
 
     static getAllocateFiche(id_class, cb) {
-        connection.query('SELECT * FROM table_fiche_affecter WHERE id_class=?', [id_class], (err, row) => {
+        connection.query('SELECT table_fiche_affecter.id_subject,s.ref_code,s.name as subject_name,t.civility,t.name as teacher_name,nb_heure_affecter,t.id_teacher FROM table_fiche_affecter\n'+
+            'JOIN subject s on table_fiche_affecter.id_subject = s.id_subject\n'+
+            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n'+
+            'WHERE id_class = ?', [id_class], (err, row) => {
             if (err) throw err
             cb(row)
         })
     }
 
     static insertAllocateFiche(data, cb) {
-        connection.query('INSERT INTO table_fiche_affecter (id_class,ref_code,id_teacher,heure_affecter,heure_double_affecter) ' +
-            'VALUES (?,?,?,?,?)',
-            [data.id_class, data.ref_code, data.id_teacher, data.heure_affecter, data.heure_double_affecter], (err) => {
+        connection.query('INSERT INTO table_fiche_affecter (id_class,id_subject,id_teacher,nb_heure_affecter) ' +
+            'VALUES (?,?,?,?)',
+            [data.id_class, data.id_subject, data.id_teacher, data.nb_heure_affecter], (err) => {
                 if (err) throw err
                 cb()
             }
@@ -305,17 +308,20 @@ class Model {
     }
 
 
-    static updateAllocateFiche(id_class, data, cb) {
-        connection.query('UPDATE table_fiche_affecter SET ref_code=?,id_teacher=?,heure_affecter=?,heure_double_affecter=? WHERE id_class=?',
-            [data.ref_code, data.id_teacher, data.heure_affecter, data.heure_double_affecter,id_class], (err) => {
+    static updateAllocateFiche(data, cb) {
+        console.log(data)
+        connection.query('UPDATE table_fiche_affecter SET nb_heure_affecter = ? WHERE id_class = ? AND id_subject = ? AND id_teacher = ?',
+            [data.nb_heure_affecter, data.id_class, data.id_subject, data.id_teacher], (err) => {
                 if (err) throw err
                 cb()
             }
         )
     }
 
-    static deleteAllocateFiche(id_class, cb) {
-        connection.query('DELETE FROM table_fiche_affecter WHERE id_class=?', [id_class], (err) => {
+    static deleteAllocateFiche(ids, cb) {
+        console.log(ids)
+        connection.query('DELETE FROM sunland_educhecktest.table_fiche_affecter WHERE id_class = ? AND id_subject = ? AND id_teacher = ?', 
+        [ids.id_class,ids.id_subject,ids.id_teacher], (err) => {
             if (err) throw err
             cb()
         })
@@ -325,8 +331,9 @@ class Model {
     //<------------------- Recap Methode ------------------------------------------------>
 
     static getRecapRef_code(cb) {
-        connection.query('SELECT s.ref_code,s.name,SUM(heure_affecter+heure_double_affecter) as totals FROM table_fiche_affecter\n' +
-            'JOIN subject s on s.ref_code = table_fiche_affecter.ref_code GROUP BY s.ref_code',
+        connection.query('SELECT s.ref_code,s.name,SUM(nb_heure_affecter) as totals FROM table_fiche_affecter\n'+
+            'JOIN subject s on table_fiche_affecter.id_subject = s.id_subject\n'+
+            'GROUP BY ref_code;',
             (err, rows) => {
                 if (err) throw err
                 cb(rows)
@@ -334,9 +341,9 @@ class Model {
     }
 
     static getRecapRef_codeFilter(filter, cb) {
-        connection.query('SELECT s.ref_code,s.name,SUM(heure_affecter+heure_double_affecter) as totals FROM table_fiche_affecter\n' +
-            'JOIN subject s on s.ref_code = table_fiche_affecter.ref_code\n' +
-            'WHERE s.sector = ? GROUP BY s.ref_code',
+        connection.query('SELECT s.ref_code,s.name,SUM(nb_heure_affecter) as totals FROM table_fiche_affecter\n'+
+            'JOIN subject s on table_fiche_affecter.id_subject = s.id_subject\n' +
+            'WHERE sector=? GROUP BY ref_code;',
             [filter], (err, rows) => {
                 if (err) throw err
                 cb(rows)
@@ -345,9 +352,10 @@ class Model {
     }
 
     static getRecapTeacher(cb){
-        connection.query('SELECT t.id_teacher,t.name as teacher_name,c.id_class,c.sector,c.name as class_name,heure_affecter+heure_double_affecter as tot_class FROM table_fiche_affecter\n' +
-                            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
-                            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher',
+        connection.query('SELECT table_fiche_affecter.id_teacher,t.name as teacher_name,c.id_class,c.name as class_name,c.sector,SUM(nb_heure_affecter) as tot_class FROM table_fiche_affecter\n'+
+        'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n' +
+        'JOIN class c on table_fiche_affecter.id_class = c.id_class\n'+
+        'GROUP BY table_fiche_affecter.id_teacher',
             (err,rows) => {
                 if(err) throw err
                 cb(rows)
@@ -356,7 +364,7 @@ class Model {
     }
 
     static getRecapTeacherID(id,cb){
-        connection.query('SELECT t.id_teacher,t.name as teacher_name,c.id_class,c.sector,c.name as class_name,heure_affecter+heure_double_affecter as tot_class FROM table_fiche_affecter\n' +
+        connection.query('SELECT t.id_teacher,t.name as teacher_name,c.id_class,c.sector,c.name as class_name,SUM(nb_heure_affecter) as tot_class FROM table_fiche_affecter\n' +
             'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
             'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n'+
             'WHERE t.id_teacher = ?',[id],
@@ -368,10 +376,10 @@ class Model {
     }
 
     static getRecapTeacherFilter(filter,cb){
-        connection.query('SELECT t.id_teacher,t.name as teacher_name,c.id_class,c.name as class_name,heure_affecter+heure_double_affecter as tot_class FROM table_fiche_affecter\n' +
-            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
-            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n' +
-            '   WHERE sector = ?' ,[filter],
+        connection.query('SELECT table_fiche_affecter.id_teacher,t.name as teacher_name,c.id_class,c.name as class_name,c.sector,SUM(nb_heure_affecter) as tot_class FROM table_fiche_affecter\n'+
+        'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n' +
+        'JOIN class c on table_fiche_affecter.id_class = c.id_class\n'+
+        'GROUP BY table_fiche_affecter.id_teacher WHERE sector=?' ,[filter],
             (err,rows) => {
                 if(err) throw err
                 cb(rows)
@@ -380,7 +388,7 @@ class Model {
     }
 
     static getMaxTeacher(cb){
-        connection.query('SELECT t.graduation,t.id_teacher,t.civility,t.name,SUM(heure_affecter+heure_double_affecter) as MaxTOT FROM table_fiche_affecter\n' +
+        connection.query('SELECT t.graduation,t.id_teacher,t.civility,t.name,SUM(nb_heure_affecter) as MaxTOT FROM table_fiche_affecter\n' +
             'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
             'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher GROUP BY t.id_teacher',
             (err,rows) => {
@@ -393,20 +401,19 @@ class Model {
 
     static getMaxTeacherFilter(filter,subjectFilter,cb){
         if(subjectFilter === undefined){
-            connection.query('SELECT t.graduation,t.id_teacher,t.civility,t.name,SUM(heure_affecter+heure_double_affecter) as MaxTOT FROM table_fiche_affecter\n' +
-                'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
-                'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher \n' +
-                'WHERE sector = ? GROUP BY t.id_teacher',
+            connection.query('SELECT t.graduation,t.id_teacher,t.civility,t.name,SUM(nb_heure_affecter) as MaxTOT FROM table_fiche_affecter\n' +
+            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
+            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher WHERE sector=? GROUP BY t.id_teacher',
                 [filter],(err,rows) => {
                     if(err) throw err
                     cb(rows)
                 }
             )
         }else{
-            connection.query('SELECT t.graduation,t.id_teacher,t.civility,t.name,SUM(heure_affecter+heure_double_affecter) as MaxTOT FROM table_fiche_affecter\n' +
+            connection.query('SELECT t.graduation,t.id_teacher,t.civility,t.name,SUM(nb_heure_affecter) as MaxTOT FROM table_fiche_affecter\n' +
                 'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
                 'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher \n' +
-                'WHERE sector = ? AND ref_code = ? GROUP BY t.id_teacher',
+                'WHERE c.sector = ? AND table_fiche_affecter.id_subject = ? GROUP BY t.id_teacher',
                 [filter,subjectFilter],(err,rows) => {
                     if(err) throw err
                     cb(rows)
@@ -414,6 +421,74 @@ class Model {
             )
         }
 
+    }
+
+
+    static getRefCodeRecap(ref_code,cb){
+        connection.query("SELECT table_fiche_affecter.id_subject,s.name,SUM(nb_heure_affecter) as TOT FROM table_fiche_affecter\n"+
+        "JOIN subject s on table_fiche_affecter.id_subject = s.id_subject\n"+
+        "WHERE s.ref_code = ? GROUP BY s.id_subject" , [ref_code] , 
+            (err,rows) => {
+                if(err) throw err
+                cb(rows)
+            }
+        )
+    }
+
+
+
+    static updateDHG(sector,DHG,cb){
+        connection.query("UPDATE sector SET DHG=? WHERE sector=?" , [sector,DHG] , (err) => {
+            if(err) throw err
+            cb(true)
+        })
+    }
+
+
+    static getDHG(sector,cb){
+        connection.query("SELECT DHG FROM sector WHERE sector=?" , [sector] , (err,row) => {
+            if(err) throw err
+            cb(row)
+        })
+    }
+
+
+    static getTotHoureClassALL(cb,sector = undefined){
+        if(sector === undefined){
+            connection.query("SELECT c.id_class,c.name, SUM(heure_double_affecter+heure_affecter) as tot_class FROM table_fiche_affecter\n" +
+                "JOIN class c on table_fiche_affecter.id_class = c.id_class\n" +
+                "GROUP BY id_class" ,
+                (err,rows) => {
+                    if(err) throw err
+                    cb(rows)
+                }
+
+            )
+        }else{
+            connection.query("SELECT c.id_class,c.name, SUM(heure_double_affecter+heure_affecter) as tot_class FROM table_fiche_affecter\n" +
+                "JOIN class c on table_fiche_affecter.id_class = c.id_class\n" +
+                "WHERE c.sector = ? GROUP BY id_class",[sector],
+                (err,rows) => {
+                    if(err) throw err
+                    cb(rows)
+                }
+
+            )
+        }
+    }
+
+    static getTotHoureClass(id_class,cb){
+        connection.query("SELECT s.ref_code, s.name as matiere,c.name, table_fiche_affecter.heure_affecter , table_fiche_affecter.heure_double_affecter\n" +
+            "    FROM table_fiche_affecter\n" +
+            "    JOIN class c on table_fiche_affecter.id_class = c.id_class\n" +
+            "    JOIN subject s on table_fiche_affecter.ref_code = s.ref_code\n" +
+            "    WHERE table_fiche_affecter.id_class = ?" , [id_class] ,
+                (err,rows) => {
+                    if(err) throw err
+                    cb(rows)
+                }
+
+            )
     }
 
 
