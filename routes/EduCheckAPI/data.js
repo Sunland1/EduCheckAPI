@@ -50,10 +50,25 @@ router.get('/teacher/:id', (req, res) => {
 router.post('/teacher', (req, res) => {
     let data = req.body.data
     let sector = req.body.sector
-    model.insertTeacher(data, sector, () => {
+    model.insertTeacher(data, sector, (lastId) => {
+        let data = {
+            id_teacher: lastId
+        }
+        res.status(201).json(data)
+    })
+})
+
+
+router.post('/teacherSector' , (req,res) => {
+    let id_teacher = req.body.id_teacher
+    let sector = req.body.sector
+
+    model.insertTeacherSector(sector,id_teacher , () => {
         res.sendStatus(201)
     })
 })
+
+
 
 router.patch("/teacher/:id", (req, res) => {
 

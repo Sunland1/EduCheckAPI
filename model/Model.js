@@ -65,10 +65,19 @@ class Model {
             connection.query("INSERT INTO teach_sector (id_teacher,sector) VALUES (?,?)",
                 [rows.insertId, sector], (err) => {
                     if (err) throw err
-                    cb()
+                    cb(rows.insertId)
                 }
             )
         })
+    }
+
+    static insertTeacherSector(sector,id_teacher,cb){
+        connection.query("INSERT INTO teach_sector (id_teacher,sector) VALUES (?,?)",
+                [id_teacher, sector], (err) => {
+                    if (err) throw err
+                    cb()
+                }
+        )
     }
 
     static updateTeacher(data, id, cb) {
@@ -176,7 +185,7 @@ class Model {
     }
 
     static getAllSubjectFilter(filter, cb) {
-        connection.query("SELECT id_subject,ref_code,name FROM subject WHERE sector=?", [filter], (err, rows) => {
+        connection.query("SELECT id_subject,ref_code,subject_code,name FROM subject WHERE sector=?", [filter], (err, rows) => {
             if (err) throw err
             cb(rows)
         })
@@ -190,15 +199,15 @@ class Model {
     }
 
     static insertSubject(data, sector, cb) {
-        connection.query("INSERT INTO subject (ref_code,name,sector) VALUES (?,?)", [data, sector], (err) => {
+        connection.query("INSERT INTO subject (ref_code,subject_code,name,sector) VALUES (?,?)", [data, sector], (err) => {
             if (err) throw err
             cb()
         })
     }
 
     static updateSubject(data, id_subject, cb) {
-        connection.query("UPDATE subject SET ref_code=?,sector=?,name=? WHERE id_subject=?",
-            [data.ref_code, data.sector, data.name, id_subject], (err) => {
+        connection.query("UPDATE subject SET ref_code=?,subject_code=?,sector=?,name=? WHERE id_subject=?",
+            [data.ref_code,data.subject_code,data.sector, data.name, id_subject], (err) => {
                 if (err) throw err
                 cb()
             }
@@ -330,10 +339,36 @@ class Model {
 
     //<------------------- Recap Methode ------------------------------------------------>
 
+    static getRecapDataHSA(filter,cb){
+        if(filter === "LUFA"){
+            connection.query("SELECT c.sector,c.id_class,c.name,table_fiche_affecter.id_teacher,t.graduation, SUM(nb_heure_affecter) as tot_class FROM table_fiche_affecter\n"+
+            "JOIN class c on table_fiche_affecter.id_class = c.id_class\n"+
+            "JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n"+
+            "WHERE sector='LYC' OR sector='UFA' GROUP BY table_fiche_affecter.id_teacher,c.sector,c.id_class \n" , 
+                (err,rows) => {
+                    if(err) throw err
+                    cb(rows)
+                }
+            
+            )
+        }else{
+            connection.query("SELECT table_fiche_affecter.id_teacher,t.graduation, SUM(nb_heure_affecter) as tot_HPDE FROM table_fiche_affecter\n"+
+            "JOIN class c on table_fiche_affecter.id_class = c.id_class\n"+
+            "JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n"+
+            "WHERE sector='COL' GROUP BY table_fiche_affecter.id_teacher" , 
+                (err,rows) => {
+                    if(err) throw err
+                    cb(rows)
+                }
+            
+            )
+        }
+    }
+
     static getRecapRef_code(cb) {
-        connection.query('SELECT s.ref_code,s.name,SUM(nb_heure_affecter) as totals FROM table_fiche_affecter\n'+
-            'JOIN subject s on table_fiche_affecter.id_subject = s.id_subject\n'+
-            'GROUP BY ref_code;',
+        connection.query("SELECT s.ref_code,s.subject_code,s.name,SUM(nb_heure_affecter) as totals FROM table_fiche_affecter\n"+
+            "JOIN subject s on table_fiche_affecter.id_subject = s.id_subject\n"+
+            "WHERE sector='LYC' OR sector='UFA' GROUP BY ref_code;",
             (err, rows) => {
                 if (err) throw err
                 cb(rows)
@@ -341,7 +376,7 @@ class Model {
     }
 
     static getRecapRef_codeFilter(filter, cb) {
-        connection.query('SELECT s.ref_code,s.name,SUM(nb_heure_affecter) as totals FROM table_fiche_affecter\n'+
+        connection.query('SELECT s.ref_code,s.subject_code,s.name,SUM(nb_heure_affecter) as totals FROM table_fiche_affecter\n'+
             'JOIN subject s on table_fiche_affecter.id_subject = s.id_subject\n' +
             'WHERE sector=? GROUP BY ref_code;',
             [filter], (err, rows) => {
@@ -367,7 +402,7 @@ class Model {
         connection.query('SELECT t.id_teacher,t.name as teacher_name,c.id_class,c.sector,c.name as class_name,SUM(nb_heure_affecter) as tot_class FROM table_fiche_affecter\n' +
             'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
             'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n'+
-            'WHERE t.id_teacher = ?',[id],
+            'WHERE t.id_teacher = ? GROUP BY c.id_class',[id],
             (err,rows) => {
                 if(err) throw err
                 cb(rows)
@@ -425,7 +460,7 @@ class Model {
 
 
     static getRefCodeRecap(ref_code,cb){
-        connection.query("SELECT table_fiche_affecter.id_subject,s.name,SUM(nb_heure_affecter) as TOT FROM table_fiche_affecter\n"+
+        connection.query("SELECT table_fiche_affecter.id_subject,s.subject_code,s.name,SUM(nb_heure_affecter) as TOT FROM table_fiche_affecter\n"+
         "JOIN subject s on table_fiche_affecter.id_subject = s.id_subject\n"+
         "WHERE s.ref_code = ? GROUP BY s.id_subject" , [ref_code] , 
             (err,rows) => {

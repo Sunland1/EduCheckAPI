@@ -35,6 +35,14 @@ router.get('/ref_code' , (req, res) => {
 })
 
 
+router.get('/hsa' , (req,res) => {
+    let filter = req.query.filter
+    model.getRecapDataHSA(filter , (data) => {
+        res.status(200).json(data)
+    })
+})
+
+
 router.get('/teacher' , (req, res) => {
     let filter = req.query.filter
     if(filter !== undefined){
