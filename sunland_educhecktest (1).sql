@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mysql-sunland.alwaysdata.net
--- Generation Time: Jul 05, 2021 at 10:31 AM
--- Server version: 10.4.17-MariaDB
+-- Generation Time: Sep 10, 2021 at 04:11 PM
+-- Server version: 10.4.20-MariaDB
 -- PHP Version: 7.4.19
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `sunland_educhecktest`
 --
-CREATE DATABASE IF NOT EXISTS `sunland_educhecktest` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `sunland_educhecktest`;
 
 -- --------------------------------------------------------
 
@@ -40,15 +38,47 @@ CREATE TABLE `class` (
 --
 
 INSERT INTO `class` (`id_class`, `sector`, `name`) VALUES
-(2, 'COL', 'TESTFINAL'),
-(4, 'LYC', 'BTS1'),
-(5, 'COL', 'TEST78'),
-(6, 'COL', 'TR45'),
-(7, 'COL', 'BTS5'),
-(22, 'UFA', 'NDRC1'),
-(24, 'COL', 'BTS'),
-(25, 'COL', 'TEST'),
-(26, 'UFA', 'MCO1');
+(44, 'UFA', 'MCO1'),
+(47, 'UFA', 'MC02'),
+(51, 'UFA', 'NDRC1'),
+(52, 'UFA', 'NDRC2'),
+(54, 'LYC', '1A'),
+(55, 'LYC', '2A');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ponderate`
+--
+
+CREATE TABLE `ponderate` (
+  `id_subject` int(11) NOT NULL,
+  `isPonderate` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `ponderate`
+--
+
+INSERT INTO `ponderate` (`id_subject`, `isPonderate`) VALUES
+(10, 1),
+(11, 1),
+(13, 1),
+(14, 1),
+(15, 1),
+(16, 1),
+(17, 1),
+(18, 1),
+(33, 0),
+(34, 1),
+(35, 1),
+(36, 1),
+(37, 1),
+(38, 1),
+(40, 0),
+(41, 0),
+(42, 1),
+(43, 1);
 
 -- --------------------------------------------------------
 
@@ -58,17 +88,18 @@ INSERT INTO `class` (`id_class`, `sector`, `name`) VALUES
 
 CREATE TABLE `sector` (
   `sector` varchar(3) NOT NULL,
-  `name` varchar(35) NOT NULL
+  `name` varchar(35) NOT NULL,
+  `DHG` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `sector`
 --
 
-INSERT INTO `sector` (`sector`, `name`) VALUES
-('COL', 'COLLEGE'),
-('LYC', 'LYCEE'),
-('UFA', 'BTS');
+INSERT INTO `sector` (`sector`, `name`, `DHG`) VALUES
+('COL', 'COLLEGE', 456),
+('LYC', 'LYCEE', 335),
+('UFA', 'BTS', 335);
 
 -- --------------------------------------------------------
 
@@ -77,8 +108,10 @@ INSERT INTO `sector` (`sector`, `name`) VALUES
 --
 
 CREATE TABLE `subject` (
-  `ref_code` varchar(55) NOT NULL,
-  `sector` varchar(3) NOT NULL,
+  `id_subject` int(11) NOT NULL,
+  `ref_code` varchar(255) NOT NULL,
+  `subject_code` varchar(255) NOT NULL,
+  `sector` varchar(5) NOT NULL,
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -86,12 +119,25 @@ CREATE TABLE `subject` (
 -- Dumping data for table `subject`
 --
 
-INSERT INTO `subject` (`ref_code`, `sector`, `name`) VALUES
-('L123', 'COL', 'Informatique'),
-('L1234', 'LYC', 'Histoire'),
-('L389', 'LYC', 'Géographie'),
-('L600', 'UFA', 'SI&BDD'),
-('L900', 'COL', 'Géographie');
+INSERT INTO `subject` (`id_subject`, `ref_code`, `subject_code`, `sector`, `name`) VALUES
+(10, 'AGL1', 'AGL1', 'UFA', 'ANGLAIS LV1'),
+(11, 'CGEXP', 'CGEXP', 'UFA', 'CULT. GENER. EXPRESSION'),
+(13, 'ENTRE', 'ENTRE', 'UFA', 'Option entrepreneuriat'),
+(14, 'CEJM', 'CEJM', 'UFA', 'CEJM'),
+(15, 'MAEQC', 'MAEQC', 'UFA', 'MANAG. EQUIP. COMMERC.'),
+(16, 'DRCVC', 'DRCVC', 'UFA', 'DEV. REL. CLT. VENTE CONSEIL'),
+(17, 'ADOCO', 'ADOCO', 'UFA', 'ANIM. DYNAM. OFFRE COMMERCIALE'),
+(18, 'GESOP', 'GESOP', 'UFA', 'GESTION OPERATIONNELLE'),
+(33, 'profref', 'prf', 'UFA', 'professeur référent'),
+(34, 'L8013', 'BLOC 1', 'UFA', 'REL. CLIENT NEGO. VENTE'),
+(35, 'L8013', 'BLOC 2', 'UFA', 'REL. CLIENT DIST. ET DIGIT.'),
+(36, 'L8013', 'BLOC 3', 'UFA', 'REL. CLIENT DIST. ET ANIM. RESEAUX'),
+(37, 'L8013', 'AT. PRO', 'UFA', 'ATELIER DE PROFESSIONNALISATION'),
+(38, 'L8013', 'CEJM APPL', 'UFA', 'CEJM APPLIQUEE'),
+(40, 'L0422', 'TOEIC', 'UFA', 'TOEIC'),
+(41, 'L0202', 'VOLTAIRE', 'UFA', 'VOLTAIRE'),
+(42, 'LTEST', 'TEST', 'LYC', 'TEST'),
+(43, 'LTEST', 'TEST1', 'LYC', 'TEST1');
 
 -- --------------------------------------------------------
 
@@ -100,23 +146,57 @@ INSERT INTO `subject` (`ref_code`, `sector`, `name`) VALUES
 --
 
 CREATE TABLE `table_fiche` (
+  `id_subject` int(11) NOT NULL,
   `id_class` int(11) NOT NULL,
-  `ref_code` varchar(55) NOT NULL,
-  `heure` double NOT NULL,
-  `heure_double` double NOT NULL
+  `nb_heure` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `table_fiche`
 --
 
-INSERT INTO `table_fiche` (`id_class`, `ref_code`, `heure`, `heure_double`) VALUES
-(2, 'L123', 4, 0.4),
-(25, 'L123', 5, 0),
-(22, 'L600', 1, 1),
-(26, 'L600', 1, 0),
-(2, 'L900', 2, 0),
-(25, 'L900', 7, 1);
+INSERT INTO `table_fiche` (`id_subject`, `id_class`, `nb_heure`) VALUES
+(10, 44, 5),
+(10, 47, 3),
+(10, 51, 4),
+(10, 52, 3),
+(11, 44, 3),
+(11, 47, 2),
+(11, 51, 3),
+(11, 52, 2),
+(13, 44, 2),
+(13, 47, 2),
+(14, 44, 4),
+(14, 47, 4),
+(14, 51, 4),
+(14, 52, 4),
+(15, 44, 6),
+(15, 47, 4),
+(16, 44, 10),
+(16, 47, 6),
+(17, 44, 7),
+(17, 47, 5),
+(18, 44, 6),
+(18, 47, 4),
+(33, 44, 0.5),
+(33, 47, 0.5),
+(33, 51, 0.5),
+(33, 52, 0.5),
+(34, 51, 8),
+(34, 52, 6),
+(35, 51, 7),
+(35, 52, 5),
+(36, 51, 5),
+(36, 52, 4),
+(37, 51, 8),
+(37, 52, 8),
+(38, 51, 2),
+(38, 52, 1),
+(40, 51, 1),
+(42, 54, 8),
+(42, 55, 7),
+(43, 54, 9),
+(43, 55, 8);
 
 -- --------------------------------------------------------
 
@@ -126,18 +206,66 @@ INSERT INTO `table_fiche` (`id_class`, `ref_code`, `heure`, `heure_double`) VALU
 
 CREATE TABLE `table_fiche_affecter` (
   `id_class` int(11) NOT NULL,
+  `id_subject` int(11) NOT NULL,
   `id_teacher` int(11) NOT NULL,
-  `ref_code` varchar(255) NOT NULL,
-  `heure_affecter` double NOT NULL,
-  `heure_double_affecter` double NOT NULL
+  `nb_heure_affecter` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `table_fiche_affecter`
 --
 
-INSERT INTO `table_fiche_affecter` (`id_class`, `id_teacher`, `ref_code`, `heure_affecter`, `heure_double_affecter`) VALUES
-(2, 7, 'L123', 4, 5);
+INSERT INTO `table_fiche_affecter` (`id_class`, `id_subject`, `id_teacher`, `nb_heure_affecter`) VALUES
+(44, 10, 13, 5),
+(44, 11, 14, 3),
+(44, 13, 15, 2),
+(44, 14, 16, 4),
+(44, 15, 16, 6),
+(44, 16, 12, 10),
+(44, 17, 17, 7),
+(44, 18, 15, 6),
+(44, 33, 12, 0.5),
+(47, 10, 13, 3),
+(47, 11, 14, 2),
+(47, 13, 15, 2),
+(47, 14, 16, 4),
+(47, 15, 16, 4),
+(47, 16, 12, 6),
+(47, 17, 17, 5),
+(47, 18, 15, 4),
+(47, 33, 16, 0.5),
+(51, 10, 13, 5),
+(51, 11, 14, 3),
+(51, 14, 39, 4),
+(51, 33, 40, 0.5),
+(51, 34, 38, 2),
+(51, 34, 40, 6),
+(51, 35, 38, 2),
+(51, 35, 39, 1),
+(51, 35, 40, 4),
+(51, 36, 38, 3),
+(51, 36, 41, 2),
+(51, 37, 13, 1),
+(51, 37, 14, 1),
+(51, 37, 39, 3),
+(51, 37, 40, 3),
+(51, 38, 39, 2),
+(51, 40, 13, 1),
+(52, 10, 13, 3),
+(52, 11, 14, 2),
+(52, 14, 39, 4),
+(52, 33, 38, 0.5),
+(52, 34, 38, 6),
+(52, 35, 38, 2),
+(52, 35, 39, 1),
+(52, 35, 40, 2),
+(52, 36, 38, 2),
+(52, 36, 41, 2),
+(52, 37, 13, 1),
+(52, 37, 14, 1),
+(52, 37, 38, 3),
+(52, 37, 41, 3),
+(52, 38, 38, 1);
 
 -- --------------------------------------------------------
 
@@ -150,7 +278,7 @@ CREATE TABLE `teacher` (
   `civility` varchar(4) NOT NULL,
   `name` varchar(255) NOT NULL,
   `firstname` varchar(255) NOT NULL,
-  `graduation` time NOT NULL
+  `graduation` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -158,13 +286,18 @@ CREATE TABLE `teacher` (
 --
 
 INSERT INTO `teacher` (`id_teacher`, `civility`, `name`, `firstname`, `graduation`) VALUES
-(3, 'M', 'Horville', 'Alexandre', '15:00:00'),
-(5, 'M', 'Hello', 'Alexandre', '18:00:00'),
-(6, 'M', 'Nouille', 'Fichue', '15:00:00'),
-(7, 'M', 'Horville', 'Alexandre', '15:00:00'),
-(8, 'M', 'Gérard', 'Depardieux', '15:00:00'),
-(10, 'M', 'Lorentz', 'Olivier', '15:00:00'),
-(11, 'M', 'Test', 'Test', '15:00:00');
+(12, 'M', 'JEAN-BAPTISTE', 'RONALD', '18:00:00'),
+(13, 'M', 'DJEDJE', 'FRANCK', '18:00:00'),
+(14, 'M', 'TITLI', 'DENIS', '18:00:00'),
+(15, 'M', 'ZAGZAG', 'BENJAMIN', '18:00:00'),
+(16, 'M', 'FOUET', 'PIERRE-ALAIN', '18:00:00'),
+(17, 'Mme', 'TERNISIEN', 'DELPHINE', '18:00:00'),
+(38, 'MME', 'ARNAUD', 'Agnès', '18:00:00'),
+(39, 'MME', 'MOCQUE', 'Justine', '18:00:00'),
+(40, 'MME', 'SOUMMAR', 'Nadjet', '18:00:00'),
+(41, 'MME', 'HAKIMI', 'Lina', '18:00:00'),
+(42, 'MME', 'DU CREST', 'Cécile', '18:00:00'),
+(45, 'M', 'Horville', 'Alexandre', '18:00:00');
 
 -- --------------------------------------------------------
 
@@ -182,10 +315,12 @@ CREATE TABLE `teacher_class_p` (
 --
 
 INSERT INTO `teacher_class_p` (`id_teacher`, `id_class`) VALUES
-(5, 7),
-(5, 25),
-(10, 22),
-(10, 26);
+(12, 44),
+(12, 47),
+(38, 52),
+(40, 51),
+(45, 54),
+(45, 55);
 
 -- --------------------------------------------------------
 
@@ -203,12 +338,20 @@ CREATE TABLE `teach_sector` (
 --
 
 INSERT INTO `teach_sector` (`id_teacher`, `sector`) VALUES
-(5, 'COL'),
-(6, 'COL'),
-(7, 'COL'),
-(8, 'COL'),
-(10, 'UFA'),
-(11, 'LYC');
+(12, 'UFA'),
+(13, 'LYC'),
+(13, 'UFA'),
+(14, 'UFA'),
+(15, 'LYC'),
+(15, 'UFA'),
+(16, 'UFA'),
+(17, 'UFA'),
+(38, 'UFA'),
+(39, 'UFA'),
+(40, 'UFA'),
+(41, 'UFA'),
+(42, 'UFA'),
+(45, 'LYC');
 
 -- --------------------------------------------------------
 
@@ -244,6 +387,12 @@ ALTER TABLE `class`
   ADD KEY `class_sector_sector_fk` (`sector`);
 
 --
+-- Indexes for table `ponderate`
+--
+ALTER TABLE `ponderate`
+  ADD PRIMARY KEY (`id_subject`);
+
+--
 -- Indexes for table `sector`
 --
 ALTER TABLE `sector`
@@ -253,22 +402,22 @@ ALTER TABLE `sector`
 -- Indexes for table `subject`
 --
 ALTER TABLE `subject`
-  ADD PRIMARY KEY (`ref_code`),
-  ADD KEY `subject_sector_sector_fk` (`sector`);
+  ADD PRIMARY KEY (`id_subject`),
+  ADD KEY `table_name_sector_sector_fk` (`sector`);
 
 --
 -- Indexes for table `table_fiche`
 --
 ALTER TABLE `table_fiche`
-  ADD PRIMARY KEY (`ref_code`,`id_class`),
-  ADD KEY `table_fiche_affecter_class_id_class_fk` (`id_class`);
+  ADD PRIMARY KEY (`id_subject`,`id_class`),
+  ADD KEY `table_fiche_class_id_class_fk` (`id_class`);
 
 --
 -- Indexes for table `table_fiche_affecter`
 --
 ALTER TABLE `table_fiche_affecter`
-  ADD PRIMARY KEY (`id_class`),
-  ADD KEY `table_fiche_affecter_subject_ref_code_fk_2` (`ref_code`),
+  ADD PRIMARY KEY (`id_class`,`id_subject`,`id_teacher`),
+  ADD KEY `table_fiche_affecter_subject_id_subject_fk` (`id_subject`),
   ADD KEY `table_fiche_affecter_teacher_id_teacher_fk` (`id_teacher`);
 
 --
@@ -306,13 +455,19 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `class`
 --
 ALTER TABLE `class`
-  MODIFY `id_class` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id_class` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+
+--
+-- AUTO_INCREMENT for table `subject`
+--
+ALTER TABLE `subject`
+  MODIFY `id_subject` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `teacher`
 --
 ALTER TABLE `teacher`
-  MODIFY `id_teacher` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_teacher` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `user`
@@ -331,25 +486,31 @@ ALTER TABLE `class`
   ADD CONSTRAINT `class_sector_sector_fk` FOREIGN KEY (`sector`) REFERENCES `sector` (`sector`);
 
 --
+-- Constraints for table `ponderate`
+--
+ALTER TABLE `ponderate`
+  ADD CONSTRAINT `ponderate_subject_id_subject_fk` FOREIGN KEY (`id_subject`) REFERENCES `subject` (`id_subject`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `subject`
 --
 ALTER TABLE `subject`
-  ADD CONSTRAINT `subject_sector_sector_fk` FOREIGN KEY (`sector`) REFERENCES `sector` (`sector`);
+  ADD CONSTRAINT `table_name_sector_sector_fk` FOREIGN KEY (`sector`) REFERENCES `sector` (`sector`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `table_fiche`
 --
 ALTER TABLE `table_fiche`
-  ADD CONSTRAINT `table_fiche_affecter_class_id_class_fk` FOREIGN KEY (`id_class`) REFERENCES `class` (`id_class`) ON DELETE CASCADE,
-  ADD CONSTRAINT `table_fiche_affecter_subject_ref_code_fk` FOREIGN KEY (`ref_code`) REFERENCES `subject` (`ref_code`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `table_fiche_class_id_class_fk` FOREIGN KEY (`id_class`) REFERENCES `class` (`id_class`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `table_fiche_subject_id_subject_fk` FOREIGN KEY (`id_subject`) REFERENCES `subject` (`id_subject`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `table_fiche_affecter`
 --
 ALTER TABLE `table_fiche_affecter`
-  ADD CONSTRAINT `table_fiche_affecter_subject_ref_code_fk_2` FOREIGN KEY (`ref_code`) REFERENCES `subject` (`ref_code`),
-  ADD CONSTRAINT `table_fiche_affecter_table_fiche_id_class_fk` FOREIGN KEY (`id_class`) REFERENCES `table_fiche` (`id_class`),
-  ADD CONSTRAINT `table_fiche_affecter_teacher_id_teacher_fk` FOREIGN KEY (`id_teacher`) REFERENCES `teacher` (`id_teacher`);
+  ADD CONSTRAINT `table_fiche_affecter_class_id_class_fk` FOREIGN KEY (`id_class`) REFERENCES `class` (`id_class`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `table_fiche_affecter_subject_id_subject_fk` FOREIGN KEY (`id_subject`) REFERENCES `subject` (`id_subject`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `table_fiche_affecter_teacher_id_teacher_fk` FOREIGN KEY (`id_teacher`) REFERENCES `teacher` (`id_teacher`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `teacher_class_p`
