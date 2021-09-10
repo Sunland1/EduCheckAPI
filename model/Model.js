@@ -391,7 +391,7 @@ class Model {
     static getRecapRef_code(cb) {
         connection.query("SELECT s.ref_code,s.subject_code,s.name,SUM(nb_heure_affecter) as totals FROM table_fiche_affecter\n"+
             "JOIN subject s on table_fiche_affecter.id_subject = s.id_subject\n"+
-            "WHERE sector='LYC' OR sector='UFA' GROUP BY ref_code;",
+            "WHERE sector='LYC' OR sector='UFA' GROUP BY s.ref_code;",
             (err, rows) => {
                 if (err) throw err
                 cb(rows)
@@ -401,7 +401,7 @@ class Model {
     static getRecapRef_codeFilter(filter, cb) {
         connection.query('SELECT s.ref_code,s.subject_code,s.name,SUM(nb_heure_affecter) as totals FROM table_fiche_affecter\n'+
             'JOIN subject s on table_fiche_affecter.id_subject = s.id_subject\n' +
-            'WHERE sector=? GROUP BY ref_code;',
+            'WHERE sector=? GROUP BY s.ref_code;',
             [filter], (err, rows) => {
                 if (err) throw err
                 cb(rows)
