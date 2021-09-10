@@ -119,6 +119,14 @@ router.delete('/allocate' , (req, res) => {
 })
 
 
+router.delete('/allocateAll/:sector' , (req,res) => {
+    let sector = req.params.sector
+    model.deleteAllocateFicheAll(sector, () => {
+        res.sendStatus(204)
+    })
+})
+
+
 
 
 

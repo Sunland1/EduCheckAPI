@@ -332,7 +332,6 @@ class Model {
 
 
     static updateAllocateFiche(data, cb) {
-        console.log(data)
         connection.query('UPDATE table_fiche_affecter SET nb_heure_affecter = ? WHERE id_class = ? AND id_subject = ? AND id_teacher = ?',
             [data.nb_heure_affecter, data.id_class, data.id_subject, data.id_teacher], (err) => {
                 if (err) throw err
@@ -342,12 +341,21 @@ class Model {
     }
 
     static deleteAllocateFiche(ids, cb) {
-        console.log(ids)
         connection.query('DELETE FROM sunland_educhecktest.table_fiche_affecter WHERE id_class = ? AND id_subject = ? AND id_teacher = ?', 
         [ids.id_class,ids.id_subject,ids.id_teacher], (err) => {
             if (err) throw err
             cb()
         })
+    }
+
+
+    static deleteAllocateFicheAll(sector,cb){
+        connection.query('DELETE table_fiche_affecter FROM table_fiche_affecter\n'+
+            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n'+
+            'WHERE c.sector = ?' , [sector] , (err) => {
+                if(err) throw err
+                cb()
+            })
     }
 
 
@@ -554,6 +562,9 @@ class Model {
 
             )
     }
+
+
+
 
 
 }
