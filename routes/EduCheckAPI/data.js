@@ -187,10 +187,12 @@ router.get("/subject/:id", (req, res) => {
 router.post("/subject", (req, res) => {
     let data = req.body.data
     let sector = req.body.sector
+    let isPond = req.body.isPond
 
-
-    model.insertSubject(data, sector, () => {
-        res.sendStatus(201)
+    model.insertSubject(data, sector, (id) => {
+        model.isPond(id,isPond,() => {
+            res.sendStatus(201)
+        })
     })
 })
 

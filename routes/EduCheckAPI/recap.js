@@ -64,6 +64,13 @@ router.get('/teacher/:id' , (req,res) => {
     })
 })
 
+router.get('/teacherAll/:id' , (req,res) => {
+    let id_teacher = req.params.id
+    model.getAllRecapTeacherID(id_teacher,(data) => {
+        res.status(200).json(data)
+    })
+})
+
 
 router.get('/teacherMax',(req, res) => {
     let filter = req.query.filter

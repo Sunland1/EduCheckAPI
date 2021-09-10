@@ -26,8 +26,6 @@ router.use(function authenticateToken(req, res, next) {
 
 router.post('/usual', (req, res) => {
     let data = req.body
-
-    console.log(data)
     model.insertUsualFiche(data, () => {
         res.sendStatus(201)
     })
@@ -54,17 +52,19 @@ router.get('/usual/:id',(req, res) => {
     })
 })
 
-router.patch('/usual/:id',(req, res) => {
-    let id_class = req.params.id
+router.patch('/usual/:id_class/:id_subject',(req, res) => {
+    let id_class = req.params.id_class
+    let id_subject = req.params.id_subject
     let data = req.body
-    model.updateUsualFiche(id_class,data,() => {
+    model.updateUsualFiche(id_class,id_subject,data,() => {
         res.sendStatus(200)
     })
 })
 
-router.delete('/usual/:id',(req,res) => {
-    let id_class = req.params.id
-    model.deleteUsualFiche(id_class,() => {
+router.delete('/usual/:id_class/:id_subject',(req,res) => {
+    let id_class = req.params.id_class
+    let id_subject = req.params.id_subject
+    model.deleteUsualFiche(id_class,id_subject,() => {
         res.sendStatus(204)
     })
 })

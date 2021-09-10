@@ -199,10 +199,24 @@ class Model {
     }
 
     static insertSubject(data, sector, cb) {
-        connection.query("INSERT INTO subject (ref_code,subject_code,name,sector) VALUES (?,?)", [data, sector], (err) => {
+        connection.query("INSERT INTO subject (ref_code,subject_code,name,sector) VALUES (?,?)", [data, sector], (err,rows) => {
             if (err) throw err
-            cb()
+            cb(rows.insertId)
         })
+    }
+
+
+    static isPond(id_subject,isPond, cb){
+        let value = 1
+        if(!isPond){
+            value = 0
+        }
+        connection.query("INSERT INTO ponderate (id_subject,isPonderate) VALUES (?,?)" , [id_subject,value],
+            (err) => {
+                if(err) throw err
+                cb()
+            }
+        )
     }
 
     static updateSubject(data, id_subject, cb) {
@@ -260,17 +274,17 @@ class Model {
         })
     }
 
-    static updateUsualFiche(id_class, data, cb) {
-        connection.query('UPDATE table_fiche SET id_class=?,ref_code=?,heure=?,heure_double=?',
-            [id_class, data.ref_code, data.heure, data.heure_double], (err) => {
+    static updateUsualFiche(id_class,id_subject, data, cb) {
+        connection.query('UPDATE table_fiche SET nb_heure=? WHERE id_class=? AND id_subject=?',
+            [data.nb_heure , id_class , id_subject], (err) => {
                 if (err) throw err
                 cb()
             }
         )
     }
 
-    static deleteUsualFiche(id_class, cb) {
-        connection.query('DELETE FROM table_fiche WHERE id_class=?', [id_class], (err) => {
+    static deleteUsualFiche(id_class,id_subject, cb) {
+        connection.query('DELETE FROM table_fiche WHERE id_class=? AND id_subject=?', [id_class,id_subject], (err) => {
             if (err) throw err
             cb()
         })
@@ -341,10 +355,11 @@ class Model {
 
     static getRecapDataHSA(filter,cb){
         if(filter === "LUFA"){
-            connection.query("SELECT c.sector,c.id_class,c.name,table_fiche_affecter.id_teacher,t.graduation, SUM(nb_heure_affecter) as tot_class FROM table_fiche_affecter\n"+
+            connection.query("SELECT p.isPonderate,c.sector,c.id_class,c.name,table_fiche_affecter.id_teacher,t.graduation,table_fiche_affecter.id_subject, SUM(nb_heure_affecter) as tot_class FROM table_fiche_affecter\n"+
             "JOIN class c on table_fiche_affecter.id_class = c.id_class\n"+
             "JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n"+
-            "WHERE sector='LYC' OR sector='UFA' GROUP BY table_fiche_affecter.id_teacher,c.sector,c.id_class \n" , 
+            "JOIN ponderate p on p.id_subject = table_fiche_affecter.id_subject\n"+
+            "WHERE sector='LYC' OR sector='UFA' GROUP BY table_fiche_affecter.id_teacher,c.sector,c.id_class,table_fiche_affecter.id_subject \n" , 
                 (err,rows) => {
                     if(err) throw err
                     cb(rows)
@@ -403,6 +418,20 @@ class Model {
             'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
             'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n'+
             'WHERE t.id_teacher = ? GROUP BY c.id_class',[id],
+            (err,rows) => {
+                if(err) throw err
+                cb(rows)
+            }
+        )
+    }
+
+    static getAllRecapTeacherID(id,cb){
+        connection.query('SELECT s.subject_code, p.isPonderate,table_fiche_affecter.id_subject,t.id_teacher,t.name as teacher_name,c.id_class,c.sector,c.name as class_name,SUM(nb_heure_affecter) as tot_class FROM table_fiche_affecter\n' +
+            'JOIN class c on c.id_class = table_fiche_affecter.id_class\n' +
+            'JOIN teacher t on t.id_teacher = table_fiche_affecter.id_teacher\n'+
+            'JOIN ponderate p on p.id_subject = table_fiche_affecter.id_subject\n'+
+            'JOIN subject s on s.id_subject = table_fiche_affecter.id_subject\n'+
+            'WHERE t.id_teacher = ? GROUP BY table_fiche_affecter.id_subject,c.id_class',[id],
             (err,rows) => {
                 if(err) throw err
                 cb(rows)
